@@ -53,6 +53,14 @@ async def load_resources():
         
     gc.collect()
 
+@app.get("/")
+def home():
+    return {
+        "message": "SHL Assessment Recommender API is Live!",
+        "docs_url": "/docs",
+        "health_check": "/health"
+    }
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
