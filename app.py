@@ -32,10 +32,12 @@ class RecommendationResponse(BaseModel):
 @app.on_event("startup")
 async def load_resources():
     global model, products_data, embeddings_matrix
+    import gc
     
-    # Load model
+    # Load model with minimal memory footprint strategy if possible
+    # We are using a small model (80MB), but the overhead can be high.
     print("Loading model...")
-    model = SentenceTransformer('all-MiniLM-L6-v2') 
+    model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
     
     # Load embeddings
     if os.path.exists("product_embeddings.pkl"):
@@ -47,7 +49,9 @@ async def load_resources():
             embeddings_matrix = embeddings_matrix / (norm + 1e-9)
         print(f"Loaded {len(products_data)} items.")
     else:
-        print("Warning: product_embeddings.pkl not found. Recommendations will fail.")
+        print("product_embeddings.pkl not found.")
+        
+    gc.collect()
 
 @app.get("/health")
 def health_check():
